@@ -10,7 +10,7 @@ import Foundation
 
 public extension DeveloperPortal {
 
-    func fetchDevices(for team: Team, types: DeviceType = .all, session: Session) async throws -> [Device] {
+    public func fetchDevices(for team: Team, types: DeviceType = .all, session: Session) async throws -> [Device] {
         debugLog("[SideSign] fetchDevices starting...")
         verboseLog("[SideSign] Team: \(team.name) (\(team.identifier))")
 
