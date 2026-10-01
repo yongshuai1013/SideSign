@@ -10,7 +10,7 @@ import Foundation
 
 public extension DeveloperPortal {
 
-    func fetchAppGroups(for team: Team, session: Session) async throws -> [AppGroup] {
+    public func fetchAppGroups(for team: Team, session: Session) async throws -> [AppGroup] {
         debugLog("[SideSign] fetchAppGroups starting...")
         verboseLog("[SideSign] Team: \(team.name)")
 
@@ -28,7 +28,7 @@ public extension DeveloperPortal {
         return appGroups
     }
 
-    func addAppGroup(name: String, groupIdentifier: String, team: Team, session: Session) async throws -> AppGroup {
+    public func addAppGroup(name: String, groupIdentifier: String, team: Team, session: Session) async throws -> AppGroup {
         debugLog("[SideSign] addAppGroup starting...")
         verboseLog("[SideSign] Name: '\(name)', GroupID: '\(groupIdentifier)', Team: \(team.name)")
 
@@ -70,7 +70,7 @@ public extension DeveloperPortal {
         return updated
     }
 
-    func assignAppGroups(_ appGroups: [AppGroup], to appID: AppID, team: Team, session: Session) async throws -> AppID {
+    public func assignAppGroups(_ appGroups: [AppGroup], to appID: AppID, team: Team, session: Session) async throws -> AppID {
         debugLog("[SideSign] assignAppGroups starting...")
         verboseLog("[SideSign] AppID: \(appID.bundleIdentifier), AppGroups: \(appGroups.map { $0.identifier }), Team: \(team.name)")
 
@@ -101,7 +101,7 @@ public extension DeveloperPortal {
         return updatedAppID
     }
 
-    func deleteAppGroup(_ appGroup: AppGroup, team: Team, session: Session) async throws -> Bool {
+    public func deleteAppGroup(_ appGroup: AppGroup, team: Team, session: Session) async throws -> Bool {
         debugLog("[SideSign] deleteAppGroup starting...")
         verboseLog("[SideSign] GroupID: \(appGroup.groupID), Identifier: \(appGroup.identifier), Team: \(team.name)")
 
