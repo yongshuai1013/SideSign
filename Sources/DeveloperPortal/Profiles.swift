@@ -10,7 +10,7 @@ import Foundation
 
 public extension DeveloperPortal {
 
-    func listProvisioningProfiles(includeTeamProfiles: Bool = true, for team: Team, session: Session) async throws -> [ListedProvisioningProfile] {
+    public func listProvisioningProfiles(includeTeamProfiles: Bool = true, for team: Team, session: Session) async throws -> [ListedProvisioningProfile] {
         debugLog("[SideSign] listProvisioningProfiles starting (includeTeamProfiles=\(includeTeamProfiles))...")
         verboseLog("[SideSign] Team: \(team.name)")
 
@@ -47,7 +47,7 @@ public extension DeveloperPortal {
         }
     }
 
-    func createProvisioningProfile(name: String,
+    public func createProvisioningProfile(name: String,
                                   appID: AppID,
                                   certificateIDs: [String],
                                   deviceIDs: [String],
@@ -147,7 +147,7 @@ public extension DeveloperPortal {
         }
     }
 
-    func downloadProvisioningProfile(profileID: String,
+    public func downloadProvisioningProfile(profileID: String,
                                      team: Team,
                                      session: Session) async throws -> ProvisioningProfile
     {
@@ -178,7 +178,7 @@ public extension DeveloperPortal {
         }
     }
 
-    func downloadProvisioningProfile(for appID: AppID,
+    public func downloadProvisioningProfile(for appID: AppID,
                                      isTeamProfile: Bool = true,
                                      subPlatform: String? = nil,
                                      deviceType: DeviceType = .iPhone,
@@ -239,7 +239,7 @@ public extension DeveloperPortal {
         }
     }
 
-    func downloadProvisioningProfile(for appID: AppID,
+    public func downloadProvisioningProfile(for appID: AppID,
                                      isTeamProfile: Bool = true,
                                      type: ProfileType,
                                      team: Team,
@@ -255,7 +255,7 @@ public extension DeveloperPortal {
         )
     }
 
-    func deleteProvisioningProfile(profileID: String, team: Team, session: Session) async throws -> Bool {
+    public func deleteProvisioningProfile(profileID: String, team: Team, session: Session) async throws -> Bool {
         debugLog("[SideSign] deleteProvisioningProfile starting...")
         verboseLog("[SideSign] ProfileID: \(profileID), Team: \(team.name)")
 
