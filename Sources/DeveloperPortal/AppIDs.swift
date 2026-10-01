@@ -10,7 +10,7 @@ import Foundation
 
 public extension DeveloperPortal {
 
-    func fetchAppIDs(for team: Team, session: Session) async throws -> [AppID] {
+    public func fetchAppIDs(for team: Team, session: Session) async throws -> [AppID] {
         debugLog("[SideSign] fetchAppIDs starting...")
         verboseLog("[SideSign] Team: \(team.name)")
 
@@ -28,7 +28,7 @@ public extension DeveloperPortal {
         return appIDs
     }
 
-    func addAppID(withName name: String, bundleIdentifier: String, team: Team, session: Session) async throws -> AppID {
+    public func addAppID(withName name: String, bundleIdentifier: String, team: Team, session: Session) async throws -> AppID {
         debugLog("[SideSign] addAppID starting...")
         verboseLog("[SideSign] Name: '\(name)', BundleID: '\(bundleIdentifier)', Team: \(team.name)")
 
@@ -65,7 +65,7 @@ public extension DeveloperPortal {
         return createdAppID
     }
 
-    func updateAppID(_ appID: AppID, team: Team, session: Session) async throws -> AppID {
+    public func updateAppID(_ appID: AppID, team: Team, session: Session) async throws -> AppID {
         debugLog("[SideSign] updateAppID starting...")
         verboseLog("[SideSign] AppID: \(appID.bundleIdentifier), Team: \(team.name)")
 
@@ -96,7 +96,7 @@ public extension DeveloperPortal {
         return updatedAppID
     }
 
-    func deleteAppID(_ appID: AppID, for team: Team, session: Session) async throws -> Bool {
+    public func deleteAppID(_ appID: AppID, for team: Team, session: Session) async throws -> Bool {
         debugLog("[SideSign] deleteAppID starting...")
         verboseLog("[SideSign] AppID: \(appID.name) (\(appID.bundleIdentifier)), Team: \(team.name)")
 
