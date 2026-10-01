@@ -28,7 +28,7 @@ public extension DeveloperPortal {
         return devices
     }
 
-    func registerDevice(name: String,
+    public func registerDevice(name: String,
                         identifier: String,
                         type: DeviceType,
                         team: Team,
