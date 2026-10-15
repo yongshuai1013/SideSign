@@ -311,7 +311,7 @@ public extension DeveloperPortal {
 
         let headers: [String: String] = [
             "Content-Type": "text/x-xml-plist",
-            "X-MMe-Client-Info": "<Pixel 7> <Android;14;UQ1A.240205.002> <com.apple.AuthKit/1 (com.apple.akd/1.0)>",
+            "X-MMe-Client-Info": "<Windows> <Windows;10.0.19045> <com.apple.AuthKit/1 (com.apple.akd/1.0)>",
             "Accept": "text/x-xml-plist",
             "User-Agent": "akd/1.0 CFNetwork/808.1.4",
             "X-Xcode-Version": "14.2 (14C18)",
