@@ -308,7 +308,7 @@ public extension DeveloperPortal {
 
         let headers: [String: String] = [
             "Content-Type": "text/x-xml-plist",
-            "X-MMe-Client-Info": anisetteData.clientInfo,
+            "X-MMe-Client-Info": "<Pixel 5> <Android;11;RQ3A.211001.001> <com.apple.AuthKit/1 (com.apple.akd/1.0)>",
             "Accept": "*/*",
             "User-Agent": h.grandSlam.userAgent,
             "Connection": "close"
