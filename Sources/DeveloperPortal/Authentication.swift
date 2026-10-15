@@ -10,6 +10,9 @@ import Foundation
 import GSACryptoKit
 
 public extension DeveloperPortal {
+    /// Mac client info for 2FA SMS (SideInstaller v1.5.1: SMS must come from Mac, not Android)
+    private static let macClientInfo = "<Mac15,7> <macOS;27.0;26A5378j> <com.apple.AuthKit/1 (com.apple.akd/1.0)>"
+
 
     func authenticate(appleID unsanitizedAppleID: String,
                       password: String,
@@ -699,6 +702,8 @@ public extension DeveloperPortal {
         ]
 
         var request = makeTwoFactorAuthRequest(url: Constants.URLs.phonePutURL(mode: requestedMode), context: context)
+        // SideInstaller v1.5.1: 2FA SMS must use Mac client info, Android doesn't support it
+        request.setValue(Self.macClientInfo, forHTTPHeaderField: "X-MMe-Client-Info")
         request.httpMethod = "POST"
         request.httpBody = try PropertyListSerialization.data(fromPropertyList: [
             "serverInfo": serverInfo
