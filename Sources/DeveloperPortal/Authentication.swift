@@ -10,8 +10,10 @@ import Foundation
 import GSACryptoKit
 
 public extension DeveloperPortal {
-    /// Mac client info for 2FA SMS (SideInstaller v1.5.1: SMS must come from Mac, not Android)
-    private static let macClientInfo = "<Mac15,7> <macOS;27.0;26A5378j> <com.apple.AuthKit/1 (com.apple.akd/1.0)>"
+    /// Mac client info for 2FA SMS (SideInstaller v1.5.1: SMS must come from Mac, not Android).
+    /// Sourced from the portal's custom headers so it stays configurable;
+    /// its default is the value this constant previously hard-coded.
+    private var macClientInfo: String { customHeaders.grandSlam.phoneClientInfo }
 
 
     func authenticate(appleID unsanitizedAppleID: String,
@@ -311,11 +313,11 @@ public extension DeveloperPortal {
 
         let headers: [String: String] = [
             "Content-Type": "text/x-xml-plist",
-            "X-MMe-Client-Info": "<Windows> <Windows;10.0.19045> <com.apple.AuthKit/1 (com.apple.akd/1.0)>",
+            "X-MMe-Client-Info": h.grandSlam.clientInfo,
             "Accept": "text/x-xml-plist",
-            "User-Agent": "akd/1.0 CFNetwork/808.1.4",
-            "X-Xcode-Version": "14.2 (14C18)",
-            "X-Apple-App-Info": "com.apple.gs.xcode.auth",
+            "User-Agent": h.grandSlam.userAgent,
+            "X-Xcode-Version": h.grandSlam.xcodeVersion,
+            "X-Apple-App-Info": h.grandSlam.authApp,
             "Connection": "close"
         ]
         headers.forEach { request.setValue($1, forHTTPHeaderField: $0) }
@@ -703,7 +705,7 @@ public extension DeveloperPortal {
 
         var request = makeTwoFactorAuthRequest(url: Constants.URLs.phonePutURL(mode: requestedMode), context: context)
         // SideInstaller v1.5.1: 2FA SMS must use Mac client info, Android doesn't support it
-        request.setValue(Self.macClientInfo, forHTTPHeaderField: "X-MMe-Client-Info")
+        request.setValue(macClientInfo, forHTTPHeaderField: "X-MMe-Client-Info")
         request.httpMethod = "POST"
         request.httpBody = try PropertyListSerialization.data(fromPropertyList: [
             "serverInfo": serverInfo

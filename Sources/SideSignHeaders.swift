@@ -28,17 +28,26 @@ public struct SideSignHeaders: Codable, Sendable, Equatable {
         public var headerVersion: String
         public var authApp: String
         public var userAgent: String
+        public var clientInfo: String
+        public var xcodeVersion: String
+        public var phoneClientInfo: String
 
         public init(
             service: String = Constants.GrandSlam.service,
             headerVersion: String = Constants.GrandSlam.headerVersion,
             authApp: String = Constants.GrandSlam.authApp,
-            userAgent: String = Constants.GrandSlam.userAgent
+            userAgent: String = Constants.GrandSlam.userAgent,
+            clientInfo: String = Constants.GrandSlam.clientInfo,
+            xcodeVersion: String = Constants.GrandSlam.xcodeVersion,
+            phoneClientInfo: String = Constants.GrandSlam.phoneClientInfo
         ) {
             self.service = service
             self.headerVersion = headerVersion
             self.authApp = authApp
             self.userAgent = userAgent
+            self.clientInfo = clientInfo
+            self.xcodeVersion = xcodeVersion
+            self.phoneClientInfo = phoneClientInfo
         }
     }
 

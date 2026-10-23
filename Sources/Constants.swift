@@ -15,7 +15,12 @@ public enum Constants {
         public static let service        = "iCloud"
         public static let headerVersion  = "1.0.1"
         public static let authApp        = "com.apple.gs.xcode.auth"
-        public static let userAgent      = "AuthKit/1 (Macintosh; OS X 26.6) (com.apple.dt.Xcode/26.0)"
+        // Matches the User-Agent sendAuthenticationRequest has always sent;
+        // grandSlam.userAgent previously had no consumer in request code.
+        public static let userAgent      = "akd/1.0 CFNetwork/808.1.4"
+        public static let clientInfo     = "<Windows> <Windows;10.0.19045> <com.apple.AuthKit/1 (com.apple.akd/1.0)>"
+        public static let xcodeVersion   = "14.2 (14C18)"
+        public static let phoneClientInfo = "<Mac15,7> <macOS;27.0;26A5378j> <com.apple.AuthKit/1 (com.apple.akd/1.0)>"
     }
 
     // https://idmsa.apple.com/appleauth/auth/devices
