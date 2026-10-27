@@ -296,7 +296,7 @@ public extension DeveloperPortal {
         return AuthSession(account: account, session: session)
     }
 
-    func sendAuthenticationRequest(parameters requestParameters: [String: any Sendable], anisetteData: AnisetteData) async throws -> [String: any Sendable] {
+    func sendAuthenticationRequest(parameters requestParameters: [String: any Sendable], anisetteData: AnisetteData, clientInfoOverride: String? = nil) async throws -> [String: any Sendable] {
         let requestURL = Constants.URLs.grandSlamAuth
         let h = customHeaders
 
@@ -313,7 +313,7 @@ public extension DeveloperPortal {
 
         let headers: [String: String] = [
             "Content-Type": "text/x-xml-plist",
-            "X-MMe-Client-Info": h.grandSlam.clientInfo,
+            "X-MMe-Client-Info": clientInfoOverride ?? h.grandSlam.clientInfo,
             "Accept": "text/x-xml-plist",
             "User-Agent": h.grandSlam.userAgent,
             "X-Xcode-Version": h.grandSlam.xcodeVersion,
@@ -383,7 +383,14 @@ public extension DeveloperPortal {
     }
 
     private func fetchAuthToken(app: String, parameters: [String: any Sendable], sessionKey: Data, anisetteData: AnisetteData) async throws -> FetchedAuthToken {
-        let responseDictionary = try await sendAuthenticationRequest(parameters: parameters, anisetteData: anisetteData)
+        // Staged identity (Apparition's -80046 fix, 2026-10-24): since 22 Oct
+        // Apple refuses the Xcode token (apptokens) when the request claims the
+        // sign-in's Android/Windows identity; the token request must claim a Mac
+        // instead. The sign-in requests keep the grandSlam claim so they stay
+        // consistent with the anisette; only this request swaps in the Mac
+        // client info (same configurable value the SMS 2FA path uses).
+        debugLog("[SideSign] fetchAuthToken claiming Mac client info for apptokens: \(macClientInfo)")
+        let responseDictionary = try await sendAuthenticationRequest(parameters: parameters, anisetteData: anisetteData, clientInfoOverride: macClientInfo)
 
         guard let encryptedToken = responseDictionary["et"] as? Data else {
             let payload = prettyJSONString(from: responseDictionary)
