@@ -16,6 +16,36 @@ public enum AnisetteMode: Sendable, Equatable, Codable, Hashable {
     case remoteODA(sourceURL: URL, fallbackURL: URL? = nil)
 }
 
+/// App-supplied override for the synthesized Android device profile the
+/// on-device provider presents while provisioning (ro.product.model and
+/// friends). Empty fields fall back to AnisetteKit's built-in defaults, so
+/// a host only sets the values it wants to change.
+public struct AnisetteDeviceProfileOverride: Sendable, Equatable {
+    public var sdkVersion = ""
+    public var release = ""
+    public var model = ""
+    public var brand = ""
+    public var name = ""
+    public var device = ""
+    public var manufacturer = ""
+    public var fingerprint = ""
+
+    public init() {}
+
+    func resolved() -> AnisetteDeviceProfile {
+        let d = AnisetteDeviceProfile.default
+        return AnisetteDeviceProfile(
+            sdkVersion: sdkVersion.isEmpty ? d.sdkVersion : sdkVersion,
+            release: release.isEmpty ? d.release : release,
+            model: model.isEmpty ? d.model : model,
+            brand: brand.isEmpty ? d.brand : brand,
+            name: name.isEmpty ? d.name : name,
+            device: device.isEmpty ? d.device : device,
+            manufacturer: manufacturer.isEmpty ? d.manufacturer : manufacturer,
+            fingerprint: fingerprint.isEmpty ? d.fingerprint : fingerprint)
+    }
+}
+
 public struct ODAInfo: Codable, Equatable, Sendable {
     public let url: String?
     public let base64Payload: String?
@@ -240,6 +270,12 @@ public final class AnisetteDataManager: @unchecked Sendable {
     }
 
     public var activeMode: AnisetteMode?
+
+    /// Synthesized Android device profile for on-device (ODA) provisioning.
+    /// Nil keeps AnisetteKit's built-in default profile. Applied whenever an
+    /// on-device client is created, so changes take effect on the next
+    /// provisioning or header generation.
+    public var deviceProfileOverride: AnisetteDeviceProfileOverride?
     public let baseAnisetteDirectory: URL
     private var localProvider: AnisetteClient?
     private var isCaching: Bool = false
@@ -484,6 +520,7 @@ public final class AnisetteDataManager: @unchecked Sendable {
             )
 
         case .localODA(let libDir, let prov):
+            AnisetteDeviceProfile.current = deviceProfileOverride?.resolved() ?? .default
             let targetProvDir = prov ?? provisioningDir
             try FileManager.default.createDirectory(at: targetProvDir, withIntermediateDirectories: true)
             return try AnisetteClient(
@@ -496,6 +533,7 @@ public final class AnisetteDataManager: @unchecked Sendable {
             )
 
         case .remoteODA(let sourceURL, let fallbackURL):
+            AnisetteDeviceProfile.current = deviceProfileOverride?.resolved() ?? .default
             try FileManager.default.createDirectory(at: libsDir, withIntermediateDirectories: true)
             try FileManager.default.createDirectory(at: provisioningDir, withIntermediateDirectories: true)
             if !AnisetteClient.validateLibrariesExist(at: libsDir, requiredLibraries: Constants.Anisette.Libraries.requiredNames) {
