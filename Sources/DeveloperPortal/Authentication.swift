@@ -389,8 +389,9 @@ public extension DeveloperPortal {
         // instead. The sign-in requests keep the grandSlam claim so they stay
         // consistent with the anisette; only this request swaps in the Mac
         // client info (same configurable value the SMS 2FA path uses).
-        debugLog("[SideSign] fetchAuthToken claiming Mac client info for apptokens: \(macClientInfo)")
-        let responseDictionary = try await sendAuthenticationRequest(parameters: parameters, anisetteData: anisetteData, clientInfoOverride: macClientInfo)
+        let staged = customHeaders.grandSlam.appTokensUsesMacClientInfo
+        debugLog("[SideSign] fetchAuthToken staged identity \(staged ? "ON: apptokens claims Mac client info \(macClientInfo)" : "OFF: apptokens claims grandSlam client info")")
+        let responseDictionary = try await sendAuthenticationRequest(parameters: parameters, anisetteData: anisetteData, clientInfoOverride: staged ? macClientInfo : nil)
 
         guard let encryptedToken = responseDictionary["et"] as? Data else {
             let payload = prettyJSONString(from: responseDictionary)
