@@ -31,6 +31,13 @@ public struct SideSignHeaders: Codable, Sendable, Equatable {
         public var clientInfo: String
         public var xcodeVersion: String
         public var phoneClientInfo: String
+        /// When true, the portal first fetches the GrandSlam URL bag
+        /// (GsService2/lookup) using these same identity headers and sends
+        /// the authentication requests to the bag's gsService URL, the way
+        /// isideload does. GSA rejects a first SRP request whose claim was
+        /// never seen fetching the bag. Default false keeps the historical
+        /// behavior: POST directly to the fixed endpoint, no lookup.
+        public var prefetchURLBag: Bool
 
         public init(
             service: String = Constants.GrandSlam.service,
@@ -39,7 +46,8 @@ public struct SideSignHeaders: Codable, Sendable, Equatable {
             userAgent: String = Constants.GrandSlam.userAgent,
             clientInfo: String = Constants.GrandSlam.clientInfo,
             xcodeVersion: String = Constants.GrandSlam.xcodeVersion,
-            phoneClientInfo: String = Constants.GrandSlam.phoneClientInfo
+            phoneClientInfo: String = Constants.GrandSlam.phoneClientInfo,
+            prefetchURLBag: Bool = false
         ) {
             self.service = service
             self.headerVersion = headerVersion
@@ -48,6 +56,7 @@ public struct SideSignHeaders: Codable, Sendable, Equatable {
             self.clientInfo = clientInfo
             self.xcodeVersion = xcodeVersion
             self.phoneClientInfo = phoneClientInfo
+            self.prefetchURLBag = prefetchURLBag
         }
     }
 

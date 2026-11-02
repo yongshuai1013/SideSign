@@ -296,8 +296,66 @@ public extension DeveloperPortal {
         return AuthSession(account: account, session: session)
     }
 
+    /// GrandSlam endpoint for authentication requests. With the URL bag
+    /// prefetch enabled (opt-in, see `SideSignHeaders.GrandSlam`), the bag
+    /// is fetched once — under the same identity claim as the auth
+    /// requests themselves — and its gsService URL is used, mirroring
+    /// isideload. Any lookup failure falls back to the fixed endpoint.
+    private func grandSlamServiceURL(anisetteData: AnisetteData) async -> URL {
+        let fallback = Constants.URLs.grandSlamAuth
+        guard customHeaders.grandSlam.prefetchURLBag else { return fallback }
+        if let cached = cachedURLBagGrandSlamURL { return cached }
+        let resolved = await fetchURLBagGrandSlamURL(anisetteData: anisetteData) ?? fallback
+        cachedURLBagGrandSlamURL = resolved
+        return resolved
+    }
+
+    private func fetchURLBagGrandSlamURL(anisetteData: AnisetteData) async -> URL? {
+        let h = customHeaders
+        var request = URLRequest(url: Constants.URLs.grandSlamLookup)
+        request.httpMethod = "GET"
+
+        let a = anisetteData
+        let headers: [String: String] = [
+            "Content-Type": "text/x-xml-plist",
+            "X-MMe-Client-Info": h.grandSlam.clientInfo,
+            "Accept": "text/x-xml-plist",
+            "User-Agent": h.grandSlam.userAgent,
+            "X-Xcode-Version": h.grandSlam.xcodeVersion,
+            "X-Apple-App-Info": h.grandSlam.authApp,
+            "X-Apple-I-MD": a.oneTimePassword,
+            "X-Apple-I-MD-M": a.machineID,
+            "X-Mme-Device-Id": a.deviceID,
+            "X-Apple-I-MD-LU": a.localUserID,
+            "X-Apple-I-MD-RINFO": a.routingInfo,
+            "X-Apple-I-SRL-NO": a.serialNumber,
+            "X-Apple-I-Client-Time": a.clientTime,
+            "X-Apple-Locale": a.locale,
+            "X-Apple-I-TimeZone": a.timeZone,
+            "Connection": "close"
+        ]
+        headers.forEach { request.setValue($1, forHTTPHeaderField: $0) }
+
+        do {
+            let (data, _) = try await session.data(for: request)
+            guard let bag = parsePlistOrJSON(data),
+                  let urls = bag["urls"] as? [String: any Sendable],
+                  let gsService = urls["gsService"] as? String,
+                  let url = URL(string: gsService)
+            else {
+                debugLog("[SideSign] URL bag lookup returned no gsService URL; using the fixed endpoint")
+                return nil
+            }
+            debugLog("[SideSign] URL bag lookup resolved gsService: \(url.absoluteString)")
+            return url
+        } catch {
+            debugLog("[SideSign] URL bag lookup failed: \(error); using the fixed endpoint")
+            return nil
+        }
+    }
+
     func sendAuthenticationRequest(parameters requestParameters: [String: any Sendable], anisetteData: AnisetteData) async throws -> [String: any Sendable] {
-        let requestURL = Constants.URLs.grandSlamAuth
+        let requestURL = await grandSlamServiceURL(anisetteData: anisetteData)
         let h = customHeaders
 
         let parameters: [String: any Sendable] = [

@@ -255,6 +255,11 @@ public final class DeveloperPortal: DeveloperPortalAPI, Sendable {
 
     let session: URLSession
 
+    /// GrandSlam endpoint resolved from the URL bag when
+    /// `SideSignHeaders.GrandSlam.prefetchURLBag` is enabled.
+    /// Nil means "not fetched yet" and falls back to the fixed endpoint.
+    nonisolated(unsafe) var cachedURLBagGrandSlamURL: URL?
+
     public init(session: URLSession = .shared, customHeaders: SideSignHeaders = SideSignHeaders()) {
         self.session = session
         self.cachedCustomHeaders = customHeaders
