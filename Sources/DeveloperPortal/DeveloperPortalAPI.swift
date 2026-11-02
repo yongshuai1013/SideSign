@@ -260,6 +260,12 @@ public final class DeveloperPortal: DeveloperPortalAPI, Sendable {
     /// Nil means "not fetched yet" and falls back to the fixed endpoint.
     nonisolated(unsafe) var cachedURLBagGrandSlamURL: URL?
 
+    /// Human-readable outcome of the most recent URL bag lookup
+    /// (status + resolved gsService URL, or why it fell back).
+    /// Nil when the prefetch never ran on this instance.
+    nonisolated(unsafe) var urlBagLookupReportStorage: String?
+    public var urlBagLookupReport: String? { urlBagLookupReportStorage }
+
     public init(session: URLSession = .shared, customHeaders: SideSignHeaders = SideSignHeaders()) {
         self.session = session
         self.cachedCustomHeaders = customHeaders

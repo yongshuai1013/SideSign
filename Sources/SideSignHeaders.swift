@@ -38,6 +38,11 @@ public struct SideSignHeaders: Codable, Sendable, Equatable {
         /// never seen fetching the bag. Default false keeps the historical
         /// behavior: POST directly to the fixed endpoint, no lookup.
         public var prefetchURLBag: Bool
+        /// When true, the SRP client dictionary sends its boolean fields
+        /// (bootstrap/icscrec/pbe/prkgen) as the strings "true"/"false"
+        /// and fixes loc to "en_US", matching isideload's plist shape.
+        /// Default false keeps the historical boolean values.
+        public var cpdStringValues: Bool
 
         public init(
             service: String = Constants.GrandSlam.service,
@@ -47,7 +52,8 @@ public struct SideSignHeaders: Codable, Sendable, Equatable {
             clientInfo: String = Constants.GrandSlam.clientInfo,
             xcodeVersion: String = Constants.GrandSlam.xcodeVersion,
             phoneClientInfo: String = Constants.GrandSlam.phoneClientInfo,
-            prefetchURLBag: Bool = false
+            prefetchURLBag: Bool = false,
+            cpdStringValues: Bool = false
         ) {
             self.service = service
             self.headerVersion = headerVersion
@@ -57,6 +63,7 @@ public struct SideSignHeaders: Codable, Sendable, Equatable {
             self.xcodeVersion = xcodeVersion
             self.phoneClientInfo = phoneClientInfo
             self.prefetchURLBag = prefetchURLBag
+            self.cpdStringValues = cpdStringValues
         }
     }
 

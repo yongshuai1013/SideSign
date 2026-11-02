@@ -28,13 +28,21 @@ public extension DeveloperPortal {
         debugLog("[SideSign] Starting authenticate...")
         verboseLog("[SideSign] Authenticating Apple ID: \(sanitizedAppleID)")
 
+        // Opt-in isideload plist shape: booleans as "true"/"false" strings
+        // and loc fixed to en_US (see SideSignHeaders.GrandSlam).
+        let cpdStrings = customHeaders.grandSlam.cpdStringValues
+        let cpdBootstrap: any Sendable = cpdStrings ? "true" : true
+        let cpdIcscrec: any Sendable = cpdStrings ? "true" : true
+        let cpdPbe: any Sendable = cpdStrings ? "false" : false
+        let cpdPrkgen: any Sendable = cpdStrings ? "true" : true
+
         let clientDictionary: [String: any Sendable] = [
-            "bootstrap": true,
-            "icscrec": true,
-            "pbe": false,
-            "prkgen": true,
+            "bootstrap": cpdBootstrap,
+            "icscrec": cpdIcscrec,
+            "pbe": cpdPbe,
+            "prkgen": cpdPrkgen,
             "svct": customHeaders.grandSlam.service,
-            "loc": anisetteData.locale,
+            "loc": cpdStrings ? "en_US" : anisetteData.locale,
             "X-Apple-Locale": anisetteData.locale,
             "X-Apple-I-MD": anisetteData.oneTimePassword,
             "X-Apple-I-MD-M": anisetteData.machineID,
@@ -337,18 +345,22 @@ public extension DeveloperPortal {
         headers.forEach { request.setValue($1, forHTTPHeaderField: $0) }
 
         do {
-            let (data, _) = try await session.data(for: request)
+            let (data, response) = try await session.data(for: request)
+            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
             guard let bag = parsePlistOrJSON(data),
                   let urls = bag["urls"] as? [String: any Sendable],
                   let gsService = urls["gsService"] as? String,
                   let url = URL(string: gsService)
             else {
+                urlBagLookupReportStorage = "HTTP \(status)，回應無 gsService，改用固定端點"
                 debugLog("[SideSign] URL bag lookup returned no gsService URL; using the fixed endpoint")
                 return nil
             }
+            urlBagLookupReportStorage = "HTTP \(status)，gsService=\(url.absoluteString)"
             debugLog("[SideSign] URL bag lookup resolved gsService: \(url.absoluteString)")
             return url
         } catch {
+            urlBagLookupReportStorage = "查詢失敗：\(error.localizedDescription)，改用固定端點"
             debugLog("[SideSign] URL bag lookup failed: \(error); using the fixed endpoint")
             return nil
         }
