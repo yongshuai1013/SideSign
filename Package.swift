@@ -32,10 +32,10 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-crypto.git",    exact: "4.3.1"),
 
-        .package(url: "https://github.com/mahee96/CodeSignKit.git",   branch: "main"),
-        .package(url: "https://github.com/mahee96/GSACryptoKit.git",  branch: "main"),
-        .package(url: "https://github.com/SideStore/libdeflate",      branch: "master"),
-        .package(url: "https://github.com/mahee96/AnisetteKit.git",   branch: "main"),
+        .package(url: "https://github.com/mahee96/CodeSignKit.git",   revision: "33b4f736f018ad4dfcd2e1d83590b9a5d674ab47"),
+        .package(url: "https://github.com/mahee96/GSACryptoKit.git",  revision: "eae2590eaf17fe98ce9c76b3ec2bd42b780eb123"),
+        .package(url: "https://github.com/SideStore/libdeflate",      revision: "da6c7dae03b78dc71af973664575e4209786fbfe"),
+        .package(url: "https://github.com/yongshuai1013/AnisetteKit.git", revision: "2b4a643f5302826828bf36580fee61aba655b6bb"),
 
 //        .package(name: "CodeSignKit",  path: "../../local/CodeSignKit"),
 //        .package(name: "GSACryptoKit", path: "../../local/GSACryptoKit"),
