@@ -31,7 +31,7 @@ public enum Constants {
         public static let developerServicesBase     = URL(string: "\(servicesBase)/")!
         public static let developerServicesV1Base   = URL(string: "https://developerservices2.apple.com/services/\(Constants.servicesProtocolVersion)/")!
         public static let appStoreConnectBase       = URL(string: "https://appstoreconnect.apple.com/iris/\(Constants.servicesProtocolVersion)/")!
-        public static let grandSlamAuth             = URL(string: "https://gsa.apple.com/grandslam/GsService2/")!
+        public static let grandSlamAuth             = URL(string: "https://gsa.apple.com/grandslam/GsService2")!
         public static let grandSlamLookup           = URL(string: "https://gsa.apple.com/grandslam/GsService2/lookup")!
         public static let grandSlamValidate         = URL(string: "https://gsa.apple.com/grandslam/GsService2/validate")!
         public static let trustedDevice             = URL(string: "https://gsa.apple.com/auth/verify/trusteddevice")!
