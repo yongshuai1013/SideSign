@@ -54,6 +54,12 @@ public extension DeveloperPortal {
 
         verboseLog("[SideSign] SRPClient started. Generated public key A: \(publicKey.hexEncodedString())")
 
+        // Fetch the GrandSlam URL bag with this sign-in's own anisette claim and let it
+        // dictate the SRP service URL (mirrors isideload, which fetches the bag once when
+        // its GrandSlam client is built). Any failure falls back to the built-in URL, so
+        // this can never do worse than not fetching at all.
+        let grandSlamServiceURL = await fetchGrandSlamServiceURL(anisetteData: anisetteData)
+
         // 1. Send authentication 'init' request
         let initParameters: [String: any Sendable] = [
             "A2k": publicKey,
@@ -64,7 +70,7 @@ public extension DeveloperPortal {
         ]
 
         debugLog("[SideSign] Sending authentication 'init' request...")
-        let initResponse = try await sendAuthenticationRequest(parameters: initParameters, anisetteData: anisetteData)
+        let initResponse = try await sendAuthenticationRequest(parameters: initParameters, anisetteData: anisetteData, serviceURL: grandSlamServiceURL)
 
         guard let c = initResponse["c"] as? String,
               let salt = initResponse["s"] as? Data,
@@ -127,7 +133,7 @@ public extension DeveloperPortal {
             "u": sanitizedAppleID
         ]
 
-        let completeResponseDictionary = try await sendAuthenticationRequest(parameters: completeParameters, anisetteData: anisetteData)
+        let completeResponseDictionary = try await sendAuthenticationRequest(parameters: completeParameters, anisetteData: anisetteData, serviceURL: grandSlamServiceURL)
         debugLog("[SideSign] SRP complete step finished.")
 
         guard let encryptedData = completeResponseDictionary["spd"] as? Data else {
@@ -287,7 +293,7 @@ public extension DeveloperPortal {
             "u": dsid
         ]
 
-        let fetchedToken = try await fetchAuthToken(app: app, parameters: appTokensParameters, sessionKey: sessionKey, anisetteData: anisetteData)
+        let fetchedToken = try await fetchAuthToken(app: app, parameters: appTokensParameters, sessionKey: sessionKey, anisetteData: anisetteData, serviceURL: grandSlamServiceURL)
         let session = Session(
             dsid: dsid,
             authToken: fetchedToken.token,
@@ -302,8 +308,49 @@ public extension DeveloperPortal {
         return AuthSession(account: account, session: session)
     }
 
-    func sendAuthenticationRequest(parameters requestParameters: [String: any Sendable], anisetteData: AnisetteData) async throws -> [String: any Sendable] {
-        let requestURL = Constants.URLs.grandSlamAuth
+    /// Fetches the GrandSlam URL bag and returns the SRP service URL it dictates.
+    ///
+    /// Mirrors isideload: a GET on the lookup endpoint carrying the same headers the
+    /// SRP requests below use (this sign-in's own anisette claim), then the `urls`
+    /// dictionary's `gsService` value is used verbatim. Called once per `authenticate`
+    /// and shared by the init/complete/app-token requests. Any failure (network,
+    /// parse, missing key) falls back to the built-in service URL.
+    private func fetchGrandSlamServiceURL(anisetteData: AnisetteData) async -> URL {
+        let fallback = Constants.URLs.grandSlamAuth
+        let h = customHeaders
+
+        var request = URLRequest(url: Constants.URLs.grandSlamLookup)
+        request.httpMethod = "GET"
+
+        let headers: [String: String] = [
+            "Content-Type": "text/x-xml-plist",
+            "X-MMe-Client-Info": anisetteData.clientInfo,
+            "Accept": "*/*",
+            "User-Agent": h.grandSlam.userAgent,
+            "Connection": "close"
+        ]
+        headers.forEach { request.setValue($1, forHTTPHeaderField: $0) }
+
+        do {
+            let (data, _) = try await session.data(for: request)
+            guard let dictionary = parsePlistOrJSON(data),
+                  let urls = dictionary["urls"] as? [String: any Sendable],
+                  let service = urls["gsService"] as? String,
+                  let url = URL(string: service)
+            else {
+                debugLog("[SideSign] URL bag response has no gsService URL; falling back to built-in GrandSlam URL")
+                return fallback
+            }
+            debugLog("[SideSign] URL bag gsService: \(service)")
+            return url
+        } catch {
+            debugLog("[SideSign] URL bag fetch failed: \(error); falling back to built-in GrandSlam URL")
+            return fallback
+        }
+    }
+
+    func sendAuthenticationRequest(parameters requestParameters: [String: any Sendable], anisetteData: AnisetteData, serviceURL: URL = Constants.URLs.grandSlamAuth) async throws -> [String: any Sendable] {
+        let requestURL = serviceURL
         let h = customHeaders
 
         let parameters: [String: any Sendable] = [
@@ -386,8 +433,8 @@ public extension DeveloperPortal {
         let timeToLive: TimeInterval?
     }
 
-    private func fetchAuthToken(app: String, parameters: [String: any Sendable], sessionKey: Data, anisetteData: AnisetteData) async throws -> FetchedAuthToken {
-        let responseDictionary = try await sendAuthenticationRequest(parameters: parameters, anisetteData: anisetteData)
+    private func fetchAuthToken(app: String, parameters: [String: any Sendable], sessionKey: Data, anisetteData: AnisetteData, serviceURL: URL) async throws -> FetchedAuthToken {
+        let responseDictionary = try await sendAuthenticationRequest(parameters: parameters, anisetteData: anisetteData, serviceURL: serviceURL)
 
         guard let encryptedToken = responseDictionary["et"] as? Data else {
             let payload = prettyJSONString(from: responseDictionary)
