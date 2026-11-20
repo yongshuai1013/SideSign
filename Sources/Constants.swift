@@ -16,6 +16,12 @@ public enum Constants {
         public static let headerVersion  = "1.0.1"
         public static let authApp        = "com.apple.gs.xcode.auth"
         public static let userAgent      = "AuthKit/1 (Macintosh; OS X 26.6) (com.apple.akd/1.0)"
+
+        // Rust-shape alignment test (503 investigation): header values taken
+        // verbatim from a working isideload (Rust) GrandSlam capture.
+        public static let rustUserAgent    = "akd/1.0 CFNetwork/811.5.4 Darwin/16.7.0"
+        public static let rustClientInfo   = "<MacBookPro13,3> <Mac OS X;10.12.6;16G29> <com.apple.AuthKit/1 (com.apple.akd/1.0)>"
+        public static let rustXcodeVersion = "27.0 (27A5218g)"
     }
 
     // https://idmsa.apple.com/appleauth/auth/devices

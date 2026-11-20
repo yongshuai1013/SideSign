@@ -306,9 +306,27 @@ public extension DeveloperPortal {
         let requestURL = Constants.URLs.grandSlamAuth
         let h = customHeaders
 
+        // Rust-shape alignment test (503 investigation): rewrite the cpd
+        // dictionary to match a working isideload (Rust) GrandSlam request —
+        // keep only the Rust key set, serialize booleans as strings.
+        var alignedParameters = requestParameters
+        if let cpd = requestParameters["cpd"] as? [String: any Sendable] {
+            let rustKeys: Set<String> = ["X-Apple-I-MD", "X-Apple-I-MD-M", "X-Mme-Device-Id",
+                                         "bootstrap", "icscrec", "loc", "pbe", "prkgen", "svct"]
+            var alignedCPD: [String: any Sendable] = [:]
+            for (key, value) in cpd where rustKeys.contains(key) {
+                if let boolValue = value as? Bool {
+                    alignedCPD[key] = boolValue ? "true" : "false"
+                } else {
+                    alignedCPD[key] = value
+                }
+            }
+            alignedParameters["cpd"] = alignedCPD
+        }
+
         let parameters: [String: any Sendable] = [
             "Header": ["Version": h.grandSlam.headerVersion],
-            "Request": requestParameters
+            "Request": alignedParameters
         ]
 
         let plistData = try PropertyListSerialization.data(fromPropertyList: parameters, format: .xml, options: 0)
@@ -317,11 +335,16 @@ public extension DeveloperPortal {
         request.httpMethod = "POST"
         request.httpBody = plistData
 
+        // Rust-shape alignment test (503 investigation): header set forced to
+        // the working isideload (Rust) shape at this send point, regardless of
+        // the anisette data / configured headers.
         let headers: [String: String] = [
             "Content-Type": "text/x-xml-plist",
-            "X-MMe-Client-Info": anisetteData.clientInfo,
-            "Accept": "*/*",
-            "User-Agent": h.grandSlam.userAgent,
+            "X-MMe-Client-Info": Constants.GrandSlam.rustClientInfo,
+            "Accept": "text/x-xml-plist",
+            "User-Agent": Constants.GrandSlam.rustUserAgent,
+            "X-Apple-App-Info": Constants.GrandSlam.authApp,
+            "X-Xcode-Version": Constants.GrandSlam.rustXcodeVersion,
             "Connection": "close"
         ]
         headers.forEach { request.setValue($1, forHTTPHeaderField: $0) }
