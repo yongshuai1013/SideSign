@@ -28,21 +28,15 @@ public extension DeveloperPortal {
         verboseLog("[SideSign] Authenticating Apple ID: \(sanitizedAppleID)")
 
         let clientDictionary: [String: any Sendable] = [
-            "bootstrap": true,
-            "icscrec": true,
-            "pbe": false,
-            "prkgen": true,
+            "bootstrap": "true",
+            "icscrec": "true",
+            "pbe": "false",
+            "prkgen": "true",
             "svct": customHeaders.grandSlam.service,
             "loc": anisetteData.locale,
-            "X-Apple-Locale": anisetteData.locale,
             "X-Apple-I-MD": anisetteData.oneTimePassword,
             "X-Apple-I-MD-M": anisetteData.machineID,
-            "X-Mme-Device-Id": anisetteData.deviceID,
-            "X-Apple-I-MD-LU": anisetteData.localUserID,
-            "X-Apple-I-MD-RINFO": anisetteData.routingInfo,
-            "X-Apple-I-SRL-NO": anisetteData.serialNumber,
-            "X-Apple-I-Client-Time": anisetteData.clientTime,
-            "X-Apple-I-TimeZone": anisetteData.timeZone
+            "X-Mme-Device-Id": anisetteData.deviceID
         ]
 
         guard let srpClient = SRPClient(),
