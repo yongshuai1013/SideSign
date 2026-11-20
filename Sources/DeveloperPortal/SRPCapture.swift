@@ -17,8 +17,14 @@
 import Foundation
 
 enum SRPCapture {
+    /// Reference-type counter box so the static storage is concurrency-safe
+    /// under Swift 6; every access is serialized through `lock`.
+    private final class CounterBox: @unchecked Sendable {
+        var value = 0
+    }
+
     private static let lock = NSLock()
-    private static var counter = 0
+    private static let counterBox = CounterBox()
 
     static var fileURL: URL? {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?
@@ -43,8 +49,8 @@ enum SRPCapture {
         let timestamp = ISO8601DateFormatter().string(from: Date())
 
         lock.lock()
-        counter += 1
-        let number = counter
+        counterBox.value += 1
+        let number = counterBox.value
         var text = "\n===SRP-REQ #\(number) step=\(step) \(timestamp)===\n"
         text += "\(method) \(url)\n"
         text += "\(headerLines)\n"
