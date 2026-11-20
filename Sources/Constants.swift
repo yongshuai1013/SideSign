@@ -15,7 +15,7 @@ public enum Constants {
         public static let service        = "iCloud"
         public static let headerVersion  = "1.0.1"
         public static let authApp        = "com.apple.gs.xcode.auth"
-        public static let userAgent      = "AuthKit/1 (Macintosh; OS X 26.6) (com.apple.dt.Xcode/26.0)"
+        public static let userAgent      = "AuthKit/1 (Macintosh; OS X 26.6) (com.apple.akd/1.0)"
     }
 
     // https://idmsa.apple.com/appleauth/auth/devices
