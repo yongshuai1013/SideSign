@@ -330,6 +330,10 @@ public extension DeveloperPortal {
             verboseLog("[SideSign] sendAuthenticationRequest HTTP headers: \(prettyJSONString(from: sanitizeHeadersForLogging(allHeaders)))")
         }
 
+        // Diagnostic capture (503 investigation): record the exact request
+        // bytes about to be sent. Read-only; does not modify the request.
+        SRPCapture.record(step: (requestParameters["o"] as? String) ?? "unknown", request: request)
+
         let (data, response): (Data, URLResponse)
         do {
             (data, response) = try await session.data(for: request)
